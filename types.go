@@ -29,6 +29,7 @@ type Event struct {
 	Message     json.RawMessage `json:"message,omitempty"` // JSON 格式的消息内容
 }
 
+// String dumps JSON without tailing \n
 func (ev *Event) String() string {
 	sb := strings.Builder{}
 	err := json.NewEncoder(&sb).Encode(ev)

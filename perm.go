@@ -15,22 +15,25 @@ var (
 	ErrUnexpectedAction = errors.New("unexpected action")
 )
 
+// PermRole 和 yaml config 一一对应
 type PermRole string
 
 const (
-	PermRoleOwner PermRole = "owner"
-	PermRoleAdmin PermRole = "admin"
-	PermRoleUser  PermRole = "user"
+	PermRoleOwner PermRole = "owner" // PermRoleOwner 群主或主人
+	PermRoleAdmin PermRole = "admin" // PermRoleAdmin 管理
+	PermRoleUser  PermRole = "user"  // PermRoleUser 普通用户
 )
 
 //go:embed actions.yaml
 var innerpermtable []byte
 
+// PermAction 记录 action 的描述和 params
 type PermAction struct {
 	Desc   string `yaml:"desc"`
 	Params string `yaml:"params"`
 }
 
+// Perm 即 actions.yaml 的 Go struct 映射
 type Perm struct {
 	Actions map[string]PermAction        `yaml:"actions"`
 	Config  map[PermRole][]string        `yaml:"config"`

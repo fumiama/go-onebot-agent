@@ -1,3 +1,4 @@
+// Package goba OneBot 11 协议 QQ 聊天 Agent
 package goba
 
 import (
@@ -37,10 +38,12 @@ func NewAgent(
 	}
 }
 
+// AddEvent 添加接收到的事件
 func (ag *Agent) AddEvent(grp int64, ev *Event) {
 	ag.log.Add(grp, ev, false)
 }
 
+// AddRequest 一般无需主动调用, 由 GetAction 自动添加
 func (ag *Agent) AddRequest(grp int64, req *zero.APIRequest) {
 	ag.log.Add(grp, req, true)
 }
