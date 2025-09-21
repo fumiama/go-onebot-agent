@@ -32,11 +32,13 @@ type Agent struct {
 func NewAgent(
 	id int64, batchcap, itemscap int,
 	nickname, sex, characteristics, defaultprompt string,
-) Agent {
-	return Agent{
+) (ag Agent) {
+	ag = Agent{
 		id: id, nickname: nickname, sex: sex, chars: characteristics,
 		log: chat.NewLog[fmt.Stringer](batchcap, itemscap, "\n", defaultprompt),
 	}
+	ag.LoadPermTable()
+	return
 }
 
 // AddEvent 添加接收到的事件
