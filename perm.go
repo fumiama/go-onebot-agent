@@ -11,7 +11,9 @@ import (
 )
 
 var (
-	ErrNoSuchPermRole   = errors.New("no such perm role")
+	// ErrNoSuchPermRole role 不在 config 记录中
+	ErrNoSuchPermRole = errors.New("no such perm role")
+	// ErrUnexpectedAction 该 action 在 config 中找到但在 actions 中不存在
 	ErrUnexpectedAction = errors.New("unexpected action")
 )
 
@@ -19,9 +21,12 @@ var (
 type PermRole string
 
 const (
-	PermRoleOwner PermRole = "owner" // PermRoleOwner 群主或主人
-	PermRoleAdmin PermRole = "admin" // PermRoleAdmin 管理
-	PermRoleUser  PermRole = "user"  // PermRoleUser 普通用户
+	// PermRoleOwner 群主或主人
+	PermRoleOwner PermRole = "owner"
+	// PermRoleAdmin 管理
+	PermRoleAdmin PermRole = "admin"
+	// PermRoleUser 普通用户
+	PermRoleUser PermRole = "user"
 )
 
 //go:embed actions.yaml

@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	// ErrPermissionDenied LLM 调用了不该调用的 action
 	ErrPermissionDenied = errors.New("permission denied")
 )
 
