@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
-	github.com/fumiama/deepinfra v0.0.0-20250910144855-27a4e697106d
+	github.com/fumiama/deepinfra v0.0.0-20250920170049-e3d1b92cc3a1
 	github.com/pkg/errors v0.9.1
-	github.com/wdvxdr1123/ZeroBot v1.8.2-0.20250919145948-e8ffbbc995ac
+	github.com/wdvxdr1123/ZeroBot v1.8.2-0.20250921063512-13752a73d444
 	gopkg.in/yaml.v3 v3.0.1
 )
 

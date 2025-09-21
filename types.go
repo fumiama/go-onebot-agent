@@ -8,19 +8,6 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
-type events []any
-
-func (evs events) String() string {
-	sb := strings.Builder{}
-	for _, ev := range evs {
-		err := json.NewEncoder(&sb).Encode(ev) // has been terminated with '\n'
-		if err != nil {
-			panic(errors.Wrap(err, "unexpected"))
-		}
-	}
-	return strings.TrimSpace(sb.String())
-}
-
 // Event is the simplified OneBot event that dumped to the agent in JSON format
 type Event struct {
 	Time        int64           `json:"time"`         // 事件发生的时间戳
@@ -40,4 +27,13 @@ type Event struct {
 	Comment     string          `json:"comment,omitempty"` // This field is used for Request Event
 	Sender      *zero.User      `json:"sender,omitempty"`  // 事件发送者个人信息
 	Message     json.RawMessage `json:"message,omitempty"` // JSON 格式的消息内容
+}
+
+func (ev *Event) String() string {
+	sb := strings.Builder{}
+	err := json.NewEncoder(&sb).Encode(ev)
+	if err != nil {
+		panic(errors.Wrap(err, "unexpected"))
+	}
+	return strings.TrimSpace(sb.String())
 }
