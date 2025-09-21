@@ -37,7 +37,7 @@ func NewAgent(
 		id: id, nickname: nickname, sex: sex, chars: characteristics,
 		log: chat.NewLog[fmt.Stringer](batchcap, itemscap, "\n", defaultprompt),
 	}
-	ag.LoadPermTable()
+	_ = ag.LoadPermTable()
 	return
 }
 
