@@ -82,6 +82,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 	}
 	reqs = make([]zero.APIRequest, 0, 2)
 	dec := json.NewDecoder(strings.NewReader(resp))
+	dec.UseNumber()
 	for dec.More() {
 		r := zero.APIRequest{}
 		err = dec.Decode(&r)
