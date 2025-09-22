@@ -10,17 +10,17 @@ import (
 
 // Event is the simplified OneBot event that dumped to the agent in JSON format
 type Event struct {
-	Time        int64           `json:"time"`         // 事件发生的时间戳
-	PostType    string          `json:"post_type"`    // 上报类型: message / notice / request
-	MessageType string          `json:"message_type"` // message 类型: group / private
-	SubType     string          `json:"sub_type"`     // message 子类型: normal (一般消息) / notice (灰色小字通知)
-	MessageID   int64           `json:"message_id"`   // 消息 ID, 唯一标识该事件
-	GroupID     int64           `json:"group_id"`     // QQ群号
-	UserID      int64           `json:"user_id"`      // 事件发送者QQ号
-	TargetID    int64           `json:"target_id"`
+	Time        int64           `json:"time"`               // 事件发生的时间戳
+	PostType    string          `json:"post_type"`          // 上报类型: message / notice / request
+	MessageType string          `json:"message_type"`       // message 类型: group / private
+	SubType     string          `json:"sub_type,omitempty"` // message 子类型: normal (一般消息) / notice (灰色小字通知)
+	MessageID   int64           `json:"message_id"`         // 消息 ID, 唯一标识该事件
+	GroupID     int64           `json:"group_id,omitempty"` // QQ群号
+	UserID      int64           `json:"user_id"`            // 事件发送者QQ号
+	TargetID    int64           `json:"target_id,omitempty"`
 	SelfID      int64           `json:"self_id"` // 收到事件的QQ号 (你的ID)
 	NoticeType  string          `json:"notice_type,omitempty"`
-	OperatorID  int64           `json:"operator_id"` // This field is used for Notice Event
+	OperatorID  int64           `json:"operator_id,omitempty"` // This field is used for Notice Event
 	File        *zero.File      `json:"file,omitempty"`
 	RequestType string          `json:"request_type,omitempty"`
 	Flag        string          `json:"flag,omitempty"`

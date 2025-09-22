@@ -13,55 +13,50 @@
 
 ## OneBot 11 协议
 > 输入输出均为 JSON 格式的一系列 Object，代表一系列事件或响应，以换行符分隔。
-> 所有可能的字段由对应的 Golang 结构体给出。
+> 所有可能的字段如下，type 由对应的 Golang 类型给出。
 
 ### 输入
 事件 (Event) 是输入的基本单位，
-```go
-type Event struct {
-	Time        int64           `json:"time"`         // 事件发生的时间戳
-	PostType    string          `json:"post_type"`    // 上报类型: message / notice / request
-	MessageType string          `json:"message_type"` // message 类型: group / private
-	SubType     string          `json:"sub_type"`     // message 子类型: normal (一般消息) / notice (灰色小字通知)
-	MessageID   int64           `json:"message_id"`   // 消息 ID, 唯一标识该事件
-	GroupID     int64           `json:"group_id"`     // QQ群号
-	UserID      int64           `json:"user_id"`      // 事件发送者QQ号
-	TargetID    int64           `json:"target_id"`
-	SelfID      int64           `json:"self_id"` // 收到事件的QQ号 (你的ID)
-	NoticeType  string          `json:"notice_type,omitempty"`
-	OperatorID  int64           `json:"operator_id"` // This field is used for Notice Event
-	File        *File           `json:"file,omitempty"`
-	RequestType string          `json:"request_type,omitempty"`
-	Flag        string          `json:"flag,omitempty"`
-	Comment     string          `json:"comment,omitempty"` // This field is used for Request Event
-	Sender      *User           `json:"sender,omitempty"`  // 事件发送者个人信息
-	Message     json.RawMessage `json:"message,omitempty"` // JSON 格式的消息内容
-}
-```
+|key|type|说明|
+|---|---|---|
+|time|int64|事件发生的时间戳|
+|post_type|string|上报类型: message / notice / request|
+|message_type|string|message 类型: group / private|
+|sub_type|string|message 子类型: normal (一般消息) / notice (灰色小字通知)|
+|message_id|int64|消息 ID, 唯一标识该事件|
+|group_id|int64|QQ群号|
+|user_id|int64|事件发送者QQ号|
+|target_id|int64|后述|
+|self_id|int64|收到事件的QQ号 (你的ID)|
+|notice_type|string|后述|
+|operator_id|int64|For Notice Event|
+|file|*File|后述|
+|request_type|string|后述|
+|flag|string|后述|
+|comment|string|For Request Event|
+|sender|*User|事件发送者个人信息|
+|message|json.RawMessage|JSON 格式的消息内容|
+
 其中，文件 (File) 标识一个聊天文件，
-```go
-type File struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Size  int64  `json:"size"`
-	BusID int64  `json:"busid"`
-}
-```
+|key|type|
+|---|---|
+|id|string|
+|name|string|
+|size|int64|
+
 用户 (User) 标识一个QQ用户，
-```go
-type User struct {
-	ID       int64  `json:"user_id"`
-	NickName string `json:"nickname"`
-	Sex      string `json:"sex"` // "male"、"female"、"unknown"
-	Age      int    `json:"age"`
-	Area     string `json:"area"` // 地区
-	// 以下为群聊特有字段
-	Card  string `json:"card"`  // 群名片／备注
-	Title string `json:"title"` // 专属头衔
-	Level string `json:"level"` // 群聊等级
-	Role  string `json:"role"`  // "owner"、"admin"、"member"
-}
-```
+|key|type|说明|
+|---|---|---|
+|user_id|int64|用户QQ号|
+|nickname|string|昵称|
+|sex|string|"male"、"female"、"unknown"|
+|age|int|年龄|
+|area|string|地区|
+|card|string|群名片／备注（群聊特有）|
+|title|string|专属头衔（群聊特有）|
+|level|string|群聊等级（群聊特有）|
+|role|string|"owner"、"admin"、"member"（群聊特有）|
+
 #### 详细事件种类
 
 |类型|post_type|message_type|sub_type|message_id|group_id|user_id|target_id|self_id|notice_type|operator_id|file|request_type|flag|comment|sender|message|
