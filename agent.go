@@ -28,6 +28,7 @@ type Agent struct {
 	chars         string
 	perm          *Perm
 	manualaddreq  bool
+	hasimageapi   bool
 }
 
 // NewAgent 创建一个 Agent 实例。
@@ -57,6 +58,11 @@ func (ag *Agent) AddEvent(grp int64, ev *Event) {
 // AddRequest 一般无需主动调用, 由 GetAction 自动添加
 func (ag *Agent) AddRequest(grp int64, req *zero.APIRequest) {
 	ag.log.Add(grp, req, true)
+}
+
+// CanViewImage will be true if SetViewImageAPI is called
+func (ag *Agent) CanViewImage() bool {
+	return ag.hasimageapi
 }
 
 // SetViewImageAPI 为 agent 增加识图功能, 需要模型支持视觉
@@ -93,6 +99,13 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 			}
 		}
 	})
+	ag.hasimageapi = true
+}
+
+// ClearViewImageAPI ...
+func (ag *Agent) ClearViewImageAPI() {
+	ag.log.SetPreModelize(nil)
+	ag.hasimageapi = false
 }
 
 // GetAction get OneBot CallAction from LLM and add it to context.
