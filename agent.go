@@ -11,6 +11,7 @@ import (
 	"github.com/fumiama/deepinfra/model"
 	"github.com/pkg/errors"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
 var (
@@ -56,6 +57,42 @@ func (ag *Agent) AddEvent(grp int64, ev *Event) {
 // AddRequest 一般无需主动调用, 由 GetAction 自动添加
 func (ag *Agent) AddRequest(grp int64, req *zero.APIRequest) {
 	ag.log.Add(grp, req, true)
+}
+
+// SetViewImageAPI 为 agent 增加识图功能, 需要模型支持视觉
+func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
+	ag.log.SetPreModelize(func(s *fmt.Stringer) {
+		o := *s
+		if ev, ok := o.(*Event); ok {
+			hasset := false
+			msgs := message.ParseMessage(ev.Message)
+			for i, msg := range msgs {
+				if msg.Type != "image" {
+					continue
+				}
+				if _, ok := msg.Data["__agent_desc__"]; ok {
+					continue
+				}
+				u := msg.Data["url"]
+				if !strings.HasPrefix(u, "http") {
+					continue
+				}
+				m := p.User(model.NewContentImageURL(u), model.NewContentText("使用简洁清晰明确的一段中文纯文本描述图片"))
+				desc, err := api.Request(m)
+				if err != nil {
+					continue
+				}
+				msgs[i].Data["__agent_desc__"] = desc
+				hasset = true
+			}
+			if hasset {
+				raw, err := json.Marshal(&msgs)
+				if err == nil {
+					ev.Message = raw
+				}
+			}
+		}
+	})
 }
 
 // GetAction get OneBot CallAction from LLM and add it to context.
