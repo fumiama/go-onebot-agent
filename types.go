@@ -58,9 +58,9 @@ func (resp *APIResponse) String() string {
 	return strings.TrimSpace(sb.String())
 }
 
-// Terminus 终止符, 一个空格
+// Terminus 终止符, 一个全角空格
 type Terminus struct{}
 
 func (Terminus) String() string {
-	return " "
+	return "　"
 }
