@@ -60,6 +60,11 @@ func (ag *Agent) AddRequest(grp int64, req *zero.APIRequest) {
 	ag.log.Add(grp, req, true)
 }
 
+// AddRequest 添加在执行完 zero.APIRequest 之后得到的响应
+func (ag *Agent) AddResponse(grp int64, resp *APIResponse) {
+	ag.log.Add(grp, resp, false)
+}
+
 // CanViewImage will be true if SetViewImageAPI is called
 func (ag *Agent) CanViewImage() bool {
 	return ag.hasimageapi
@@ -129,6 +134,11 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 	resp, err := api.Request(m)
 	if err != nil {
 		return
+	}
+	if strings.HasPrefix(resp, "```") { // AI returns codeblock
+		_, resp, _ = strings.Cut(resp, "\n")
+		resp = strings.Trim(resp, "`")
+		resp = strings.TrimSpace(resp)
 	}
 	reqs = make([]zero.APIRequest, 0, 2)
 	dec := json.NewDecoder(strings.NewReader(resp))

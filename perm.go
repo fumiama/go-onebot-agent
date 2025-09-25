@@ -36,6 +36,7 @@ var innerpermtable []byte
 type PermAction struct {
 	Desc   string `yaml:"desc"`
 	Params string `yaml:"params"`
+	Data   string `yaml:"data"`
 }
 
 // Perm 即 actions.yaml 的 Go struct 映射
@@ -51,7 +52,7 @@ func (p *Perm) mdtable(role PermRole) (string, error) {
 		return "", errors.Wrap(ErrNoSuchPermRole, string(role))
 	}
 	table := strings.Builder{}
-	table.WriteString("|功能|action|params|\n|---|---|---|")
+	table.WriteString("|功能|action|params|data|\n|---|---|---|---|")
 	var ac actions
 	if _, ok := p.cache.Load(role); ok {
 		ac = actions{}
@@ -70,6 +71,8 @@ func (p *Perm) mdtable(role PermRole) (string, error) {
 		table.WriteString(act)
 		table.WriteByte('|')
 		table.WriteString(a.Params)
+		table.WriteByte('|')
+		table.WriteString(a.Data)
 		table.WriteByte('|')
 	}
 	if ac != nil {

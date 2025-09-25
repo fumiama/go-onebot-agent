@@ -38,3 +38,20 @@ func (ev *Event) String() string {
 	}
 	return strings.TrimSpace(sb.String())
 }
+
+type APIResponse struct {
+	Status  string          `json:"status"`
+	Data    json.RawMessage `json:"data"`
+	Message string          `json:"message"`
+	Wording string          `json:"wording"`
+	RetCode int64           `json:"retcode"`
+}
+
+func (resp *APIResponse) String() string {
+	sb := strings.Builder{}
+	err := json.NewEncoder(&sb).Encode(resp)
+	if err != nil {
+		panic(errors.Wrap(err, "unexpected"))
+	}
+	return strings.TrimSpace(sb.String())
+}
