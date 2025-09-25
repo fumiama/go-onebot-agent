@@ -65,6 +65,11 @@ func (ag *Agent) AddResponse(grp int64, resp *APIResponse) {
 	ag.log.Add(grp, resp, false)
 }
 
+// AddTerminus 添加会话终止符
+func (ag *Agent) AddTerminus(grp int64) {
+	ag.log.Add(grp, Terminus{}, true)
+}
+
 // CanViewImage will be true if SetViewImageAPI is called
 func (ag *Agent) CanViewImage() bool {
 	return ag.hasimageapi
