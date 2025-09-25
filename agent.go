@@ -60,7 +60,7 @@ func (ag *Agent) AddRequest(grp int64, req *zero.APIRequest) {
 	ag.log.Add(grp, req, true)
 }
 
-// AddRequest 添加在执行完 zero.APIRequest 之后得到的响应
+// AddResponse 添加在执行完 zero.APIRequest 之后得到的响应
 func (ag *Agent) AddResponse(grp int64, resp *APIResponse) {
 	ag.log.Add(grp, resp, false)
 }

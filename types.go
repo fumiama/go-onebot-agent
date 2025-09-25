@@ -39,6 +39,7 @@ func (ev *Event) String() string {
 	return strings.TrimSpace(sb.String())
 }
 
+// APIResponse is the simplified OneBot response
 type APIResponse struct {
 	Status  string          `json:"status"`
 	Data    json.RawMessage `json:"data"`
@@ -47,6 +48,7 @@ type APIResponse struct {
 	RetCode int64           `json:"retcode"`
 }
 
+// String dumps JSON without tailing \n
 func (resp *APIResponse) String() string {
 	sb := strings.Builder{}
 	err := json.NewEncoder(&sb).Encode(resp)
