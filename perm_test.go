@@ -2,7 +2,7 @@ package goba
 
 import "testing"
 
-const fulltab = ` |功能|action|params|data|
+const fulltab = `|功能|action|params|data|
 |---|---|---|---|
 |结束或暂停任务|end_action|-|-|
 |发送私聊消息|send_private_msg|user_id 对方QQ号；message 要发送的内容 (json.RawMessage)|message_id 消息ID (number)|

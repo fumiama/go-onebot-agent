@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	EOA = "end_action" // EOA is a dummy action that is used to terminate request
+	// EOA is a dummy action that is used to terminate request
+	EOA = "end_action"
 )
 
 var (
