@@ -2,12 +2,14 @@ package goba
 
 import "testing"
 
-const fulltab = `|功能|action|params|data|
+const fulltab = ` |功能|action|params|data|
 |---|---|---|---|
+|结束或暂停任务|end_action|-|-|
 |发送私聊消息|send_private_msg|user_id 对方QQ号；message 要发送的内容 (json.RawMessage)|message_id 消息ID (number)|
 |发送群消息|send_group_msg|group_id 群号；message 要发送的内容 (json.RawMessage)|message_id 消息ID (number)|
 |撤回消息|delete_msg|message_id 消息ID|-|
 |发送好友赞|send_like|user_id 对方QQ号；times 赞的次数，每个好友每天最多10次 (number)|-|
+|发送表情回应|set_msg_emoji_like|message_id 消息ID；emoji_id 表情 ID|-|
 |群组踢人|set_group_kick|group_id 群号；user_id 要踢的QQ号；reject_add_request 拒绝此人的加群请求 (boolean)|-|
 |群组单人禁言|set_group_ban|group_id 群号；user_id 要禁言的QQ号；duration 禁言时长（秒），0表示取消禁言|-|
 |群组全员禁言|set_group_whole_ban|group_id 群号；enable 是否禁言 (boolean)|-|

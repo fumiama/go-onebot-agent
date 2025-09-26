@@ -14,6 +14,10 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
+const (
+	EOA = "end_action" // EOA is a dummy action that is used to terminate request
+)
+
 var (
 	// ErrPermissionDenied LLM 调用了不该调用的 action
 	ErrPermissionDenied = errors.New("permission denied")
@@ -55,7 +59,7 @@ func (ag *Agent) AddEvent(grp int64, ev *Event) {
 	ag.log.Add(grp, ev, false)
 }
 
-// AddRequest 一般无需主动调用, 由 GetAction 自动添加
+// AddRequest 添加 API 请求, 一般无需主动调用, 由 GetAction 自动添加
 func (ag *Agent) AddRequest(grp int64, req *zero.APIRequest) {
 	ag.log.Add(grp, req, true)
 }
@@ -65,7 +69,7 @@ func (ag *Agent) AddResponse(grp int64, resp *APIResponse) {
 	ag.log.Add(grp, resp, false)
 }
 
-// AddTerminus 添加会话终止符
+// AddTerminus 添加会话终止符, 一般无需主动调用, 由 GetAction 自动添加
 func (ag *Agent) AddTerminus(grp int64) {
 	ag.log.Add(grp, Terminus{}, true)
 }
@@ -158,6 +162,9 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 			continue
 		}
 		switch {
+		case r.Action == EOA:
+			ag.AddTerminus(grp)
+			return
 		case !ag.perm.allow(role, r.Action):
 			err = errors.Wrap(ErrPermissionDenied, r.Action)
 			return
