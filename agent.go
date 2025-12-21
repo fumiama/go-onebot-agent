@@ -145,10 +145,11 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 					}
 					return nil
 				})
+				logrus.Debugln("[goba] SetViewImageAPI calculated min d:", d)
 				if d < 8 { // very similar (>87.5%)
 					msgs[i].Data["__agent_desc__"] = desc
 					hasset = true
-					logrus.Debugln("[goba] SetViewImageAPI hit cache with d:", d)
+					logrus.Debugln("[goba] SetViewImageAPI hit cache.")
 					continue
 				}
 
@@ -163,6 +164,7 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 					logrus.Debugln("[goba] SetViewImageAPI conv b64 err:", err)
 					continue
 				}
+				p = p.Clone() // clear protocol content
 				m := p.User(
 					model.NewContentImageURL(imgs),
 					model.NewContentText("使用简洁清晰明确的一段中文纯文本描述图片"),

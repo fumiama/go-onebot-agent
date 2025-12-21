@@ -7,7 +7,7 @@ require (
 	github.com/FloatTech/ttl v0.0.0-20240716161252-965925764562
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
 	github.com/corona10/goimagehash v1.1.1-0.20240121134706-d8115886f360
-	github.com/fumiama/deepinfra v0.0.0-20250924162107-cf156d49a0fa
+	github.com/fumiama/deepinfra v0.0.0-20251221163610-e98ee3ba437a
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/wdvxdr1123/ZeroBot v1.8.2-0.20250921063512-13752a73d444
