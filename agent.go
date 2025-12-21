@@ -2,20 +2,24 @@
 package goba
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"image"
 	"io"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/FloatTech/imgfactory"
 	"github.com/FloatTech/ttl"
 	"github.com/fumiama/deepinfra"
 	"github.com/fumiama/deepinfra/chat"
 	"github.com/fumiama/deepinfra/model"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -108,11 +112,13 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 				}
 				resp, err := http.Get(u)
 				if err != nil {
+					logrus.Debugln("[goba] SetViewImageAPI get http err:", err)
 					continue
 				}
 				data, err := io.ReadAll(resp.Body)
 				_ = resp.Body.Close()
 				if err != nil {
+					logrus.Debugln("[goba] SetViewImageAPI read body err:", err)
 					continue
 				}
 				sum := sha256.Sum256(data)
@@ -120,18 +126,32 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 				if desc := ag.imgpcache.Get(k); desc != "" {
 					msgs[i].Data["__agent_desc__"] = desc
 					hasset = true
+					logrus.Debugln("[goba] SetViewImageAPI hit cache")
 					continue
 				}
-				img, err := model.NewContentImageDataBase64URL(data)
+				img, _, err := image.Decode(bytes.NewReader(data))
 				if err != nil {
+					logrus.Debugln("[goba] SetViewImageAPI decode img err:", err)
+					continue
+				}
+				img = imgfactory.Limit(img, 1024, 1024)
+				data, err = imgfactory.ToBytes(img)
+				if err != nil {
+					logrus.Debugln("[goba] SetViewImageAPI dump img err:", err)
+					continue
+				}
+				imgs, err := model.NewContentImageDataBase64URL(data)
+				if err != nil {
+					logrus.Debugln("[goba] SetViewImageAPI conv b64 err:", err)
 					continue
 				}
 				m := p.User(
-					model.NewContentImageURL(img),
+					model.NewContentImageURL(imgs),
 					model.NewContentText("使用简洁清晰明确的一段中文纯文本描述图片"),
 				)
 				desc, err := api.Request(m)
 				if err != nil {
+					logrus.Debugln("[goba] SetViewImageAPI request API err:", err)
 					continue
 				}
 				msgs[i].Data["__agent_desc__"] = desc
