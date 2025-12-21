@@ -2,10 +2,16 @@
 package goba
 
 import (
+	"crypto/sha256"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
+	"time"
 
+	"github.com/FloatTech/ttl"
 	"github.com/fumiama/deepinfra"
 	"github.com/fumiama/deepinfra/chat"
 	"github.com/fumiama/deepinfra/model"
@@ -32,6 +38,7 @@ type Agent struct {
 	nickname, sex string
 	chars         string
 	perm          *Perm
+	imgpcache     *ttl.Cache[uint64, string]
 	manualaddreq  bool
 	hasimageapi   bool
 }
@@ -42,12 +49,13 @@ type Agent struct {
 //   - defaultprompt 为上下文为空时的默认提示，建议为事件的 JSON，一般不会用到，因此也可留空。
 //   - manualaddreq 表示是否由用户手动添加请求。
 func NewAgent(
-	id int64, batchcap, itemscap int,
+	id int64, batchcap, itemscap int, imgpcachettl time.Duration,
 	nickname, sex, characteristics, defaultprompt string,
 	manualaddreq bool,
 ) (ag Agent) {
 	ag = Agent{
 		id: id, nickname: nickname, sex: sex, chars: characteristics,
+		imgpcache:    ttl.NewCache[uint64, string](imgpcachettl),
 		log:          chat.NewLog[fmt.Stringer](batchcap, itemscap, "\n", defaultprompt),
 		manualaddreq: manualaddreq,
 	}
@@ -98,12 +106,36 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 				if !strings.HasPrefix(u, "http") {
 					continue
 				}
-				m := p.User(model.NewContentImageURL(u), model.NewContentText("使用简洁清晰明确的一段中文纯文本描述图片"))
+				resp, err := http.Get(u)
+				if err != nil {
+					continue
+				}
+				data, err := io.ReadAll(resp.Body)
+				_ = resp.Body.Close()
+				if err != nil {
+					continue
+				}
+				sum := sha256.Sum256(data)
+				k := binary.LittleEndian.Uint64(sum[:8])
+				if desc := ag.imgpcache.Get(k); desc != "" {
+					msgs[i].Data["__agent_desc__"] = desc
+					hasset = true
+					continue
+				}
+				img, err := model.NewContentImageDataBase64URL(data)
+				if err != nil {
+					continue
+				}
+				m := p.User(
+					model.NewContentImageURL(img),
+					model.NewContentText("使用简洁清晰明确的一段中文纯文本描述图片"),
+				)
 				desc, err := api.Request(m)
 				if err != nil {
 					continue
 				}
 				msgs[i].Data["__agent_desc__"] = desc
+				ag.imgpcache.Set(k, desc)
 				hasset = true
 			}
 			if hasset {
