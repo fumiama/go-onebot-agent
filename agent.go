@@ -3,18 +3,18 @@ package goba
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"image"
 	"io"
+	"math"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/FloatTech/imgfactory"
 	"github.com/FloatTech/ttl"
+	"github.com/corona10/goimagehash"
 	"github.com/fumiama/deepinfra"
 	"github.com/fumiama/deepinfra/chat"
 	"github.com/fumiama/deepinfra/model"
@@ -121,19 +121,37 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 					logrus.Debugln("[goba] SetViewImageAPI read body err:", err)
 					continue
 				}
-				sum := sha256.Sum256(data)
-				k := binary.LittleEndian.Uint64(sum[:8])
-				if desc := ag.imgpcache.Get(k); desc != "" {
-					msgs[i].Data["__agent_desc__"] = desc
-					hasset = true
-					logrus.Debugln("[goba] SetViewImageAPI hit cache")
-					continue
-				}
 				img, _, err := image.Decode(bytes.NewReader(data))
 				if err != nil {
 					logrus.Debugln("[goba] SetViewImageAPI decode img err:", err)
 					continue
 				}
+				hsh, err := goimagehash.PerceptionHash(img)
+				if err != nil {
+					logrus.Debugln("[goba] SetViewImageAPI calc phash err:", err)
+					continue
+				}
+				d := math.MaxInt
+				desc := ""
+				_ = ag.imgpcache.Range(func(u uint64, s string) error {
+					ds, err := goimagehash.NewImageHash(u, goimagehash.PHash).Distance(hsh)
+					if err != nil {
+						logrus.Debugln("[goba] SetViewImageAPI calc phash distance err:", err)
+						return nil
+					}
+					if d > ds {
+						d = ds
+						desc = s
+					}
+					return nil
+				})
+				if d < 8 { // very similar (>87.5%)
+					msgs[i].Data["__agent_desc__"] = desc
+					hasset = true
+					logrus.Debugln("[goba] SetViewImageAPI hit cache with d:", d)
+					continue
+				}
+
 				img = imgfactory.Limit(img, 1024, 1024)
 				data, err = imgfactory.ToBytes(img)
 				if err != nil {
@@ -149,13 +167,13 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 					model.NewContentImageURL(imgs),
 					model.NewContentText("使用简洁清晰明确的一段中文纯文本描述图片"),
 				)
-				desc, err := api.Request(m)
+				desc, err = api.Request(m)
 				if err != nil {
 					logrus.Debugln("[goba] SetViewImageAPI request API err:", err)
 					continue
 				}
 				msgs[i].Data["__agent_desc__"] = desc
-				ag.imgpcache.Set(k, desc)
+				ag.imgpcache.Set(hsh.GetHash(), desc)
 				hasset = true
 			}
 			if hasset {
