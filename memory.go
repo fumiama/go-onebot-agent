@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	errEmptyMempry     = errors.New("empty memory")
+	errEmptyMemory     = errors.New("empty memory")
 	errMemoryHasReturn = errors.New("memory has \\r|\\n")
 )
 
@@ -21,7 +21,7 @@ type MemoryStorage interface {
 func extractMemory(r *zero.APIRequest) (string, error) {
 	txt, ok := r.Params["text"].(string)
 	if !ok || txt == "" {
-		return "", errEmptyMempry
+		return "", errEmptyMemory
 	}
 	for _, c := range txt {
 		if c == '\r' || c == '\n' {

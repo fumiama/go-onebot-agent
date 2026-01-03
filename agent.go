@@ -94,7 +94,7 @@ func (ag *Agent) AddTerminus(grp int64) {
 
 // AddMemory 添加记忆, 一般无需主动调用, 由 GetAction 自动添加
 func (ag *Agent) AddMemory(grp int64, text string) error {
-	return ag.mem.Save(grp, text)
+	return ag.mem.Save(grp, strings.TrimSpace(text))
 }
 
 // CanViewImage will be true if SetViewImageAPI is called
@@ -257,10 +257,6 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 		case !ag.manualaddreq:
 			ag.AddRequest(grp, &r)
 			if !ag.manualaddmem && r.Action == SVM {
-				txt, ok := r.Params["text"].(string)
-				if !ok || txt == "" {
-					continue
-				}
 				txt, err := extractMemory(&r)
 				if err != nil {
 					logrus.Debugln("[goba] GetAction extract memory err:", err)

@@ -1,15 +1,23 @@
-# OneBot 11 协议 QQ 聊天 Agent
+package goba
+
+import (
+	"strings"
+	"testing"
+	"time"
+)
+
+const expectedp = `# OneBot 11 协议 QQ 聊天 Agent
 
 ## 任务简介
 严格遵守下述 OneBot 11 协议规范，以指定账户身份操作QQ客户端，与用户自由交谈，处理各类事件。
 
 ### 你的身份
-- ID(QQ号): %v
-- 昵称: %v
-- 性别: %v
+- ID(QQ号): 12345
+- 昵称: testname
+- 性别: testsex
 
 ### 你的个性
-%v
+testchar
 
 ## OneBot 11 协议
 > 输入输出均为 JSON 格式的一系列 Object，代表一系列事件或响应，以换行符分隔。
@@ -96,10 +104,10 @@
 |推荐群|contact|type：group，id：群号|
 |回复|reply|id：消息ID|
 
-`json.RawMessage`消息示例：
-```json
+` + "`json.RawMessage`" + `消息示例：
+` + "```json" + `
 [{"type":"text","data":{"text":"[第一部分]"}},{"type":"image","data":{"file":"123.jpg"}},{"type":"text","data":{"text":"图片之后的部分，表情："}},{"type":"face","data":{"id":"123"}}]
-```
+` + "```" + `
 
 表情 ID：
 |id|desc|
@@ -445,25 +453,84 @@
 
 你可以调用的全部 API 如下表。注意：即使之前的记录显示你曾调用过某 API，但如果现在列表中不存在此 API，你就不能调用。
 
-%v
+|功能|action|params|data|
+|---|---|---|---|
+|结束或暂停任务|end_action|-|-|
+|持久化记忆|save_memory|text 简明扼要地用一句话概括你认为在该会话必须记住的一件事，禁止换行 (string)|-|
+|发送群消息|send_group_msg|group_id 群号；message 要发送的内容 (json.RawMessage)|message_id 消息ID (number)|
+|撤回消息|delete_msg|message_id 消息ID|-|
+|发送好友赞|send_like|user_id 对方QQ号；times 赞的次数，每个好友每天最多10次 (number)|-|
+|发送表情回应|set_msg_emoji_like|message_id 消息ID；emoji_id 表情 ID|-|
+|群组踢人|set_group_kick|group_id 群号；user_id 要踢的QQ号；reject_add_request 拒绝此人的加群请求 (boolean)|-|
+|群组单人禁言|set_group_ban|group_id 群号；user_id 要禁言的QQ号；duration 禁言时长（秒），0表示取消禁言|-|
+|群组全员禁言|set_group_whole_ban|group_id 群号；enable 是否禁言 (boolean)|-|
+|设置群名片|set_group_card|group_id 群号；user_id 要设置的QQ号；card 群名片内容，不填或空字符串表示删除群名片|-|
+|设置群名|set_group_name|group_id 群号；group_name 新群名|-|
+|设置群组专属头衔|set_group_special_title|group_id 群号；user_id 要设置的QQ号；special_title 专属头衔，不填或空字符串表示删除；duration 专属头衔有效期（秒），-1表示永久|-|
+|获取消息|get_msg|message_id 消息ID (number)|time 发送时间 (number)；message_type 消息类型 (string)；sender 发送人信息 (*User)；message 消息内容 (json.RawMessage)|
+|获取合并转发消息|get_forward_msg|id 合并转发ID (string)|message 消息内容 (json.RawMessage)|
+|获取陌生人信息|get_stranger_info|user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)|User|
+|获取群信息|get_group_info|group_id 群号 (number)；no_cache 是否不使用缓存 (boolean)|group_id 群号 (number)；group_name 群名称 (string)；member_count 成员数 (number)；max_member_count 最大成员数 (number)|
+|获取群成员信息|get_group_member_info|group_id 群号 (number)；user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)|User|
+|获取群成员列表|get_group_member_list|group_id 群号 (number)|[]User|
 
 #### 2. 分析调用结果
 
-- 如果任务成功完成，调用`end_action`结束本次任务；
-- 如果需要持久化记忆，调用`save_memory`，保存成功后通知用户；
+- 如果任务成功完成，调用` + "`end_action`" + `结束本次任务；
+- 如果需要持久化记忆，调用` + "`save_memory`" + `，保存成功后通知用户；
 - 如果还需要进一步操作，首先发消息将要执行的任务解释给用户，
   - 如果任务不是敏感或危险操作，直接执行；
-  - 否则，调用`end_action`暂停本次任务，等待用户确认。
+  - 否则，调用` + "`end_action`" + `暂停本次任务，等待用户确认。
 
 注意事项：
 - 如果你只是在回应用户而不做高级调用，发送一条消息成功后立即结束本次任务。
-- 除非用户明确指示，禁止连续发送消息或`@all`打扰用户！
+- 除非用户明确指示，禁止连续发送消息或` + "`@all`" + `打扰用户！
 - 用户可以在任何时候终止你的任务或添加新的指示。
 
 ### 记忆
 > 以下为你之前为当前聊天保存的记忆
-%v
+
+mem1
+mem2
+mem3
 
 ### 其它信息
-- 当前时间：%v (%v)
-- 聊天类型：%v
+- 当前时间：2026-01-03T21:36:50+08:00 (1767447410)
+- 聊天类型：群聊`
+
+type fakemem struct{}
+
+func (fakemem) Save(grp int64, text string) error {
+	return nil
+}
+
+func (fakemem) Load(grp int64) []string {
+	return []string{"mem1", "mem2", "mem3"}
+}
+
+func TestAgent_system(t *testing.T) {
+	ag := NewAgent(
+		12345, 10, 10, time.Minute, "testname", "testsex", "testchar",
+		"testd", &fakemem{}, false, false,
+	)
+	p, err := ag.system(PermRoleAdmin, 123)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedLines := strings.Split(expectedp, "\n")
+	gotLines := strings.Split(p, "\n")
+
+	if len(expectedLines) != len(gotLines) {
+		t.Fatalf("line count mismatch: expected %d lines, got %d lines", len(expectedLines), len(gotLines))
+	}
+
+	for i := 0; i < len(expectedLines); i++ {
+		if strings.HasPrefix(gotLines[i], "- 当前时间：") {
+			continue
+		}
+		if expectedLines[i] != gotLines[i] {
+			t.Fatalf("line %d mismatch:\nexpected: %q\ngot:      %q", i+1, expectedLines[i], gotLines[i])
+		}
+	}
+}
