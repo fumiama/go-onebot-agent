@@ -218,6 +218,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 ) {
 	sysp, err := ag.system(role, grp)
 	if err != nil {
+		logrus.Debugln("[goba] GetAction get sysp err:", err)
 		return
 	}
 
@@ -225,6 +226,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 
 	resp, err := api.Request(m)
 	if err != nil {
+		logrus.Debugln("[goba] GetAction request api err:", err)
 		return
 	}
 	if strings.HasPrefix(resp, "```") { // AI returns codeblock
@@ -239,6 +241,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 		r := zero.APIRequest{}
 		err = dec.Decode(&r)
 		if err != nil {
+			logrus.Debugln("[goba] GetAction decode api request err:", err)
 			break
 		}
 		if r.Action == "" {
@@ -260,6 +263,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 				}
 				txt, err := extractMemory(&r)
 				if err != nil {
+					logrus.Debugln("[goba] GetAction extract memory err:", err)
 					ag.AddResponse(grp, &APIResponse{
 						Status:  "error",
 						Message: err.Error(),
@@ -270,6 +274,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 				s := "ok"
 				msg := ""
 				if err != nil {
+					logrus.Debugln("[goba] GetAction add memory err:", err)
 					s = "error"
 					msg = err.Error()
 				}
