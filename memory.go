@@ -12,6 +12,7 @@ var (
 	errMemoryHasReturn = errors.New("memory has \\r|\\n")
 )
 
+// MemoryStorage can be a db or just some files
 type MemoryStorage interface {
 	Save(grp int64, text string) error
 	Load(grp int64) []string

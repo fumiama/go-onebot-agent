@@ -64,19 +64,3 @@ type Terminus struct{}
 func (Terminus) String() string {
 	return `{"action":"` + EOA + `"}`
 }
-
-type Memory struct {
-	Action  string `json:"action"`
-	GroupID int64  `json:"group_id,omitempty"` // QQ群号
-	UserID  int64  `json:"user_id,omitempty"`  // QQ号
-	Text    string `json:"text"`
-}
-
-func (m *Memory) String() string {
-	sb := strings.Builder{}
-	err := json.NewEncoder(&sb).Encode(m)
-	if err != nil {
-		panic(errors.Wrap(err, "unexpected"))
-	}
-	return strings.TrimSpace(sb.String())
-}
