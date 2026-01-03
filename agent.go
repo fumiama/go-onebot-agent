@@ -261,6 +261,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 					logrus.Debugln("[goba] GetAction extract memory err:", err)
 					ag.AddResponse(grp, &APIResponse{
 						Status:  "error",
+						Data:    []byte(`""`),
 						Message: err.Error(),
 					})
 					continue
@@ -277,6 +278,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 				logrus.Debugln("[goba] GetAction add memory response:", s, "msg:", msg)
 				ag.AddResponse(grp, &APIResponse{
 					Status:  s,
+					Data:    []byte(`""`),
 					Message: msg,
 				})
 			}
