@@ -27,6 +27,8 @@ import (
 const (
 	// EOA is a dummy action that is used to terminate request
 	EOA = "end_action"
+	// SVM is a dummy action that is used to indicate that a memory has been saved
+	SVM = "save_memory"
 )
 
 var (
@@ -43,7 +45,9 @@ type Agent struct {
 	chars         string
 	perm          *Perm
 	imgpcache     *ttl.Cache[uint64, string]
+	mem           MemoryStorage
 	manualaddreq  bool
+	manualaddmem  bool
 	hasimageapi   bool
 }
 
@@ -52,16 +56,17 @@ type Agent struct {
 //   - characteristics 推荐使用 Markdown 格式，描述 Agent 个性。
 //   - defaultprompt 为上下文为空时的默认提示，建议为事件的 JSON，一般不会用到，因此也可留空。
 //   - manualaddreq 表示是否由用户手动添加请求。
+//   - manualaddmem 表示是否由用户手动添加记忆。
 func NewAgent(
 	id int64, batchcap, itemscap int, imgpcachettl time.Duration,
-	nickname, sex, characteristics, defaultprompt string,
-	manualaddreq bool,
+	nickname, sex, characteristics, defaultprompt string, mem MemoryStorage,
+	manualaddreq, manualaddmem bool,
 ) (ag Agent) {
 	ag = Agent{
 		id: id, nickname: nickname, sex: sex, chars: characteristics,
-		imgpcache:    ttl.NewCache[uint64, string](imgpcachettl),
-		log:          chat.NewLog[fmt.Stringer](batchcap, itemscap, "\n", defaultprompt),
-		manualaddreq: manualaddreq,
+		imgpcache: ttl.NewCache[uint64, string](imgpcachettl),
+		log:       chat.NewLog[fmt.Stringer](batchcap, itemscap, "\n", defaultprompt),
+		mem:       mem, manualaddreq: manualaddreq, manualaddmem: manualaddmem,
 	}
 	_ = ag.LoadPermTable()
 	return
@@ -85,6 +90,11 @@ func (ag *Agent) AddResponse(grp int64, resp *APIResponse) {
 // AddTerminus 添加会话终止符, 一般无需主动调用, 由 GetAction 自动添加
 func (ag *Agent) AddTerminus(grp int64) {
 	ag.log.Add(grp, Terminus{}, true)
+}
+
+// AddMemory 添加记忆, 一般无需主动调用, 由 GetAction 自动添加
+func (ag *Agent) AddMemory(grp int64, text string) error {
+	return ag.mem.Save(grp, text)
 }
 
 // CanViewImage will be true if SetViewImageAPI is called
@@ -206,7 +216,7 @@ func (ag *Agent) ClearViewImageAPI() {
 func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role PermRole, isusersystem bool) (
 	reqs []zero.APIRequest, err error,
 ) {
-	sysp, err := ag.system(role)
+	sysp, err := ag.system(role, grp)
 	if err != nil {
 		return
 	}
@@ -243,6 +253,32 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 			return
 		case !ag.manualaddreq:
 			ag.AddRequest(grp, &r)
+			if !ag.manualaddmem && r.Action == SVM {
+				txt, ok := r.Params["text"].(string)
+				if !ok || txt == "" {
+					continue
+				}
+				txt, err := extractMemory(&r)
+				if err != nil {
+					ag.AddResponse(grp, &APIResponse{
+						Status:  "error",
+						Message: err.Error(),
+					})
+					continue
+				}
+				err = ag.AddMemory(grp, txt)
+				s := "ok"
+				msg := ""
+				if err != nil {
+					s = "error"
+					msg = err.Error()
+				}
+				ag.AddResponse(grp, &APIResponse{
+					Status:  s,
+					Message: msg,
+				})
+				continue
+			}
 		}
 		reqs = append(reqs, r)
 	}

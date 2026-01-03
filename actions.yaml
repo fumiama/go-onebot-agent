@@ -3,6 +3,10 @@ actions:
     desc: 结束或暂停任务
     params: "-"
     data: "-"
+  save_memory:
+    desc: 持久化记忆
+    params: text 简明扼要地用一句话概括你认为在该会话必须记住的一件事，禁止换行 (string)
+    data: "-"
   send_private_msg:
     desc: 发送私聊消息
     params: user_id 对方QQ号；message 要发送的内容 (json.RawMessage)
@@ -98,6 +102,7 @@ actions:
 config:
   owner:
     - end_action
+    - save_memory
     - send_private_msg
     - send_group_msg
     - delete_msg
@@ -123,6 +128,7 @@ config:
     - get_group_member_list
   admin: # need to check if gid is the same as admin's gid
     - end_action
+    - save_memory
     - send_group_msg
     - delete_msg
     - send_like
@@ -141,6 +147,7 @@ config:
     - get_group_member_list
   user: # need to check if gid is the same as user's gid
     - end_action
+    - save_memory
     - send_group_msg
     - send_like
     - set_msg_emoji_like
