@@ -12,7 +12,7 @@ const expectedp = `# OneBot 11 协议 QQ 聊天 Agent
 严格遵守下述 OneBot 11 协议规范，以指定账户身份操作QQ客户端，与用户自由交谈，处理各类事件。
 
 ### 你的身份
-- ID(QQ号): 12345
+- self_id(QQ号): 12345
 - 昵称: testname
 - 性别: testsex
 
