@@ -249,6 +249,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 		switch {
 		case r.Action == EOA:
 			ag.AddTerminus(grp)
+			err = io.EOF
 			return
 		case !ag.perm.allow(role, r.Action):
 			err = errors.Wrap(ErrPermissionDenied, r.Action)
