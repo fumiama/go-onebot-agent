@@ -256,10 +256,11 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 			err = errors.Wrap(ErrPermissionDenied, r.Action)
 			return
 		default:
-			if !ag.manualaddreq || !ag.manualaddmem {
+			autoaddmem := !ag.manualaddmem && r.Action == SVM
+			if !ag.manualaddreq || autoaddmem {
 				ag.AddRequest(grp, &r)
 			}
-			if !ag.manualaddmem && r.Action == SVM {
+			if autoaddmem {
 				txt, err := extractMemory(&r)
 				if err != nil {
 					logrus.Debugln("[goba] GetAction extract memory err:", err)
