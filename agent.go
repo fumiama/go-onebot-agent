@@ -46,6 +46,7 @@ type Agent struct {
 	perm          *Perm
 	imgpcache     *ttl.Cache[uint64, string]
 	mem           MemoryStorage
+	manualaddreq  bool
 	manualaddmem  bool
 	hasimageapi   bool
 }
@@ -59,13 +60,13 @@ type Agent struct {
 func NewAgent(
 	id int64, batchcap, itemscap int, imgpcachettl time.Duration,
 	nickname, sex, characteristics, defaultprompt string, mem MemoryStorage,
-	manualaddmem bool,
+	manualaddreq, manualaddmem bool,
 ) (ag Agent) {
 	ag = Agent{
 		id: id, nickname: nickname, sex: sex, chars: characteristics,
 		imgpcache: ttl.NewCache[uint64, string](imgpcachettl),
 		log:       chat.NewLog[fmt.Stringer](batchcap, itemscap, "\n", defaultprompt),
-		mem:       mem, manualaddmem: manualaddmem,
+		mem:       mem, manualaddreq: manualaddreq, manualaddmem: manualaddmem,
 	}
 	_ = ag.LoadPermTable()
 	return
@@ -255,7 +256,9 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 			err = errors.Wrap(ErrPermissionDenied, r.Action)
 			return
 		default:
-			ag.AddRequest(grp, &r)
+			if !ag.manualaddreq {
+				ag.AddRequest(grp, &r)
+			}
 			if !ag.manualaddmem && r.Action == SVM {
 				txt, err := extractMemory(&r)
 				if err != nil {
