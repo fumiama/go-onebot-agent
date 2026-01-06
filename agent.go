@@ -213,10 +213,10 @@ func (ag *Agent) ClearViewImageAPI() {
 //     with complete reqs before invalid call, caller may decide whether to use
 //     these reqs by themselves. Whatever, invalid req will not be added into
 //     the context. You may call AddRequest to add it but it is not recommended.
-func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role PermRole, isusersystem bool) (
+func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role PermRole, iter int, isusersystem bool) (
 	reqs []zero.APIRequest, err error,
 ) {
-	sysp, err := ag.system(role, grp)
+	sysp, err := ag.system(role, iter, grp)
 	if err != nil {
 		logrus.Debugln("[goba] GetAction get sysp err:", err)
 		return
