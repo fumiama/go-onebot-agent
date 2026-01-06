@@ -79,26 +79,26 @@ actions:
     desc: 获取陌生人信息
     params: user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)
     data: "User"
-  get_friend_list:
-    desc: 获取好友列表
-    params: "-"
-    data: "[]User"
+  #get_friend_list:
+  #  desc: 获取好友列表
+  #  params: "-"
+  #  data: "[]User"
   get_group_info:
     desc: 获取群信息
     params: group_id 群号 (number)；no_cache 是否不使用缓存 (boolean)
     data: group_id 群号 (number)；group_name 群名称 (string)；member_count 成员数 (number)；max_member_count 最大成员数 (number)
-  get_group_list:
-    desc: 获取群列表
-    params: "-"
-    data: "[]群信息"
+  #get_group_list:
+  #  desc: 获取群列表
+  #  params: "-"
+  #  data: "[]群信息"
   get_group_member_info:
     desc: 获取群成员信息
     params: group_id 群号 (number)；user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)
     data: "User"
-  get_group_member_list:
-    desc: 获取群成员列表
-    params: group_id 群号 (number)
-    data: "[]User"
+  #get_group_member_list:
+  #  desc: 获取群成员列表
+  #  params: group_id 群号 (number)
+  #  data: "[]User"
 config:
   owner:
     - end_action
@@ -121,11 +121,11 @@ config:
     - get_msg
     - get_forward_msg
     - get_stranger_info
-    - get_friend_list
+    #- get_friend_list
     - get_group_info
-    - get_group_list
+    #- get_group_list
     - get_group_member_info
-    - get_group_member_list
+    #- get_group_member_list
   admin: # need to check if gid is the same as admin's gid
     - end_action
     - save_memory
@@ -144,7 +144,7 @@ config:
     - get_stranger_info
     - get_group_info
     - get_group_member_info
-    - get_group_member_list
+    #- get_group_member_list
   user: # need to check if gid is the same as user's gid
     - end_action
     - save_memory
@@ -156,4 +156,4 @@ config:
     - get_stranger_info
     - get_group_info
     - get_group_member_info
-    - get_group_member_list
+    #- get_group_member_list

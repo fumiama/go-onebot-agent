@@ -421,7 +421,6 @@ testchar
 |获取陌生人信息|get_stranger_info|user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)|User|
 |获取群信息|get_group_info|group_id 群号 (number)；no_cache 是否不使用缓存 (boolean)|group_id 群号 (number)；group_name 群名称 (string)；member_count 成员数 (number)；max_member_count 最大成员数 (number)|
 |获取群成员信息|get_group_member_info|group_id 群号 (number)；user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)|User|
-|获取群成员列表|get_group_member_list|group_id 群号 (number)|[]User|
 
 #### 2. 逐步分析调用结果
 

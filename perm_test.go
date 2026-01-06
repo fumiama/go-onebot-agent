@@ -24,11 +24,8 @@ const fulltab = `|功能|action|params|data|
 |获取消息|get_msg|message_id 消息ID (number)|time 发送时间 (number)；message_type 消息类型 (string)；sender 发送人信息 (*User)；message 消息内容 (json.RawMessage)|
 |获取合并转发消息|get_forward_msg|id 合并转发ID (string)|message 消息内容 (json.RawMessage)|
 |获取陌生人信息|get_stranger_info|user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)|User|
-|获取好友列表|get_friend_list|-|[]User|
 |获取群信息|get_group_info|group_id 群号 (number)；no_cache 是否不使用缓存 (boolean)|group_id 群号 (number)；group_name 群名称 (string)；member_count 成员数 (number)；max_member_count 最大成员数 (number)|
-|获取群列表|get_group_list|-|[]群信息|
-|获取群成员信息|get_group_member_info|group_id 群号 (number)；user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)|User|
-|获取群成员列表|get_group_member_list|group_id 群号 (number)|[]User|`
+|获取群成员信息|get_group_member_info|group_id 群号 (number)；user_id QQ号 (number)；no_cache 是否不使用缓存 (boolean)|User|`
 
 func TestMDTable(t *testing.T) {
 	ag := new(Agent)
