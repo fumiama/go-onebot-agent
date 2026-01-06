@@ -256,7 +256,7 @@ func (ag *Agent) GetAction(api deepinfra.API, p model.Protocol, grp int64, role 
 			err = errors.Wrap(ErrPermissionDenied, r.Action)
 			return
 		default:
-			if !ag.manualaddreq {
+			if !ag.manualaddreq || !ag.manualaddmem {
 				ag.AddRequest(grp, &r)
 			}
 			if !ag.manualaddmem && r.Action == SVM {
