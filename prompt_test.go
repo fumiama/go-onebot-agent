@@ -14,7 +14,6 @@ const expectedp = `# OneBot 11 协议 QQ 聊天 Agent
 如果聊天未涉及你感兴趣的话题，你无需回复或加入对话；如果回复，注意符合口语及网络社交聊天习惯，以简明扼要的一句话为宜。
 
 ### 你的身份
-- self_id(QQ号): 12345
 - 昵称: testname
 - 性别: testsex
 
@@ -463,7 +462,7 @@ func (fakemem) Load(grp int64) []string {
 
 func TestAgent_system(t *testing.T) {
 	ag := NewAgent(&Config{
-		12345, "testname", "testsex", "testchar",
+		"testname", "testsex", "testchar",
 	}, 10, 10, time.Minute, "testd", &fakemem{}, false, false)
 	p, err := ag.system(PermRoleAdmin, 1, 123)
 	if err != nil {
