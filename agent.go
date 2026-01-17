@@ -3,6 +3,7 @@ package goba
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -39,16 +40,14 @@ var (
 // Agent is a OneBot event context, it is recommended to create one agent
 // per group or per user.
 type Agent struct {
-	log           chat.Log[fmt.Stringer]
-	id            int64
-	nickname, sex string
-	chars         string
-	perm          *Perm
-	imgpcache     *ttl.Cache[uint64, string]
-	mem           MemoryStorage
-	manualaddreq  bool
-	manualaddmem  bool
-	hasimageapi   bool
+	log          chat.Log[fmt.Stringer]
+	cfg          *Config
+	perm         *Perm
+	imgpcache    *ttl.Cache[uint64, string]
+	mem          MemoryStorage
+	manualaddreq bool
+	manualaddmem bool
+	hasimageapi  bool
 }
 
 // NewAgent 创建一个 Agent 实例。
@@ -58,15 +57,16 @@ type Agent struct {
 //   - manualaddreq 表示是否由用户手动添加请求。
 //   - manualaddmem 表示是否由用户手动添加记忆。
 func NewAgent(
-	id int64, batchcap, itemscap int, imgpcachettl time.Duration,
-	nickname, sex, characteristics, defaultprompt string, mem MemoryStorage,
+	cfg *Config, batchcap, itemscap int, imgpcachettl time.Duration,
+	defaultprompt string, mem MemoryStorage,
 	manualaddreq, manualaddmem bool,
 ) (ag Agent) {
 	ag = Agent{
-		id: id, nickname: nickname, sex: sex, chars: characteristics,
-		imgpcache: ttl.NewCache[uint64, string](imgpcachettl),
-		log:       chat.NewLog[fmt.Stringer](batchcap, itemscap, "\n", defaultprompt),
-		mem:       mem, manualaddreq: manualaddreq, manualaddmem: manualaddmem,
+		log:          chat.NewLog[fmt.Stringer](batchcap, itemscap, "\n", defaultprompt),
+		cfg:          cfg,
+		imgpcache:    ttl.NewCache[uint64, string](imgpcachettl),
+		mem:          mem,
+		manualaddreq: manualaddreq, manualaddmem: manualaddmem,
 	}
 	_ = ag.LoadPermTable()
 	return
@@ -117,20 +117,37 @@ func (ag *Agent) SetViewImageAPI(api deepinfra.API, p model.Protocol) {
 					continue
 				}
 				u := msg.Data["url"]
-				if !strings.HasPrefix(u, "http") {
+				if u == "" {
+					u = msg.Data["file"]
+				}
+				var (
+					data []byte
+					err  error
+				)
+				switch {
+				case strings.HasPrefix(u, "http"):
+					resp, err := http.Get(u)
+					if err != nil {
+						logrus.Debugln("[goba] SetViewImageAPI get http err:", err)
+						continue
+					}
+					data, err = io.ReadAll(resp.Body)
+					_ = resp.Body.Close()
+					if err != nil {
+						logrus.Debugln("[goba] SetViewImageAPI read body err:", err)
+						continue
+					}
+				case strings.HasPrefix(u, "base64://"):
+					data, err = base64.StdEncoding.DecodeString(u[9:])
+					if err != nil {
+						logrus.Debugln("[goba] SetViewImageAPI decode base64 err:", err)
+						continue
+					}
+				default:
+					// we can support local files but skip due to security concerns.
 					continue
 				}
-				resp, err := http.Get(u)
-				if err != nil {
-					logrus.Debugln("[goba] SetViewImageAPI get http err:", err)
-					continue
-				}
-				data, err := io.ReadAll(resp.Body)
-				_ = resp.Body.Close()
-				if err != nil {
-					logrus.Debugln("[goba] SetViewImageAPI read body err:", err)
-					continue
-				}
+
 				img, _, err := image.Decode(bytes.NewReader(data))
 				if err != nil {
 					logrus.Debugln("[goba] SetViewImageAPI decode img err:", err)
